@@ -8,21 +8,6 @@ from mongo_validator.errors import DocumentValidationError
 ID_SCHEMA = {"id":{"type":"string", "empty":False}}
 REQUIRED_ID_SCHEMA = {"id":{"type":"string", "empty":False}}
 
-class JSONMiddleware:
-    def process_resource(self, req, resp, resource):
-        if req.method not in ["PUT", "POST"]:
-            if getattr(resource, "process_json", False):
-                return
-
-        if getattr(resource, "process_json", True):
-            if "application/json" not in req.content_type:
-                raise falcon.HTTPUnsupportedMediaType(
-                        "This API only supports requests encoded as JSON.  "
-                        "You may need to set the Content-Type header to application/json"
-                )
-        request_body_text = req.stream.read().decode("utf-8")
-        request.context["json"] = json.loads(request_body_text)
-
 class Resource:
     get_param_schema = ID_SCHEMA
     def on_get(self, req, resp):
@@ -30,6 +15,7 @@ class Resource:
             return False
             
         document_id = req.params.get("item_id")
+
         if document_id is None:
             self.list(req, resp)
         else:
@@ -37,7 +23,7 @@ class Resource:
 
     def list(self, req, resp):
         found_documents = self.document.find(self.collection)
-        resp.body = json.dumps(list(found_documents))
+        resp.body = list(found_documents)
 
     def get(self, req, resp, document_id):
         document = self.collection.find_one({"_id":document_id})
@@ -46,7 +32,7 @@ class Resource:
             return
         document["id"] = document_id
         del document["_id"]
-        resp.body = json.dumps({"object":document})
+        resp.body = {"object":document}
 
     def on_post(self, req, resp):
         document = self.document(**request.context["json"])
@@ -54,13 +40,13 @@ class Resource:
             document.validate()
         except DocumentValidationError as document_validation_error:
             resp.status = "422 Unprocessable Entity"
-            resp.body = json.dumps(document_validation_error.errors)
+            resp.body = document_validation_error.errors
             return
 
         self.collection.insert_one(document)
         document["id"] = str(document["_id"])
         del document["_id"]
-        resp.body = json.dumps({"object":dict(document)})
+        resp.body = {"object":dict(document)}
 
     delete_param_schema = REQUIRED_ID_SCHEMA
     def on_delete(self, req, resp):

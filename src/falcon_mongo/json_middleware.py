@@ -1,5 +1,7 @@
 import json
 
+import falcon
+
 class JSONMiddleware:
     def process_resource(self, req, resp, resource):
         if req.method not in ["PUT", "POST"]:

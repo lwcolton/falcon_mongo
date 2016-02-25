@@ -23,7 +23,10 @@ class Resource:
 
     def list(self, req, resp):
         found_documents = self.document.find(self.collection)
-        resp.body = list(found_documents)
+        resp.body = self.list_wrapper(found_documents)
+
+    def list_wrapper(self, found_documents):
+        return list(found_documents)
 
     def get(self, req, resp, document_id):
         document = self.document.get(self.collection, document_id)

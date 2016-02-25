@@ -3,7 +3,7 @@ import json
 import falcon
 
 class JSONMiddleware:
-    def process_resource(self, req, resp, resource):
+    def process_resource(self, req, resp, resource, *args):
         if req.method not in ["PUT", "POST"]:
             if not getattr(resource, "process_json", False):
                 return

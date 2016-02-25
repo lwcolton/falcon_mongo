@@ -1,7 +1,7 @@
 from .resource import Resource
 
 class EmberResource(Resource):
-    def list_wrapper(found_documents):
+    def list_wrapper(self, found_documents):
         body = {"data":[]}
         for document_attrs in found_documents:
             document_attrs["trigger-name"] = document_attrs.pop("trigger")

@@ -17,7 +17,7 @@ class JSONMiddleware:
             req.context["json"] = json.loads(request_body_text)
 
     def process_response(self, req, resp, resource):
-        if req.method not in ["GET", "PUT", "POST"]:
+        if req.method not in ["GET", "PUT", "POST", "DELETE"]:
             if not getattr(resource, "process_json", False):
                 return
         if getattr(resource, "process_json", True):
